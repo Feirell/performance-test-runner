@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ESNEXT",
+    "sourceMap": true,
+    "outDir": "lib"
+  },
+  "exclude": [
+    "node_modules"
+  ],
+//  "files": ["src/performance-test-group.ts"]
+  "files": ["src/example-tests.ts"]
+}
