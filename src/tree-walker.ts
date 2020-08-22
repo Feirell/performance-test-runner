@@ -1,13 +1,20 @@
-interface Recursive {
-    containing?: Recursive[];
-
-    [key: string]: any;
+interface Recursive<K extends object> {
+    // TODO find a way to set the type to `typeof this | K` so the actual type is known not just the interface
+    // then remove the `as K | T`
+    containing: (Recursive<K> | K)[];
 }
 
-type mapDepthFirstCB<T, M> = (current: T, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void) => M;
-type mapDepthFirstAsyncCB<T, M> = (current: T, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void) => Promise<M>;
+interface MapDepthFirstCB<K extends object, T extends Recursive<K>, M = void> {
+    (current: T | K, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void): M
+}
 
-export function depthFirst<T extends Recursive>(tree: T | T[], callback: mapDepthFirstCB<T, void>) {
+interface MapDepthFirstCBAsync<K extends object, T extends Recursive<K>, M = void> {
+    (current: T | K, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void): Promise<M>
+}
+
+const isRecursive = <U extends object>(o: Recursive<U> | U): o is Recursive<U> => 'containing' in o;
+
+export function depthFirst<K extends object, T extends Recursive<K>>(tree: T | T[], callback: MapDepthFirstCB<K, T>) {
     if (!Array.isArray(tree))
         tree = [tree];
 
@@ -17,7 +24,7 @@ export function depthFirst<T extends Recursive>(tree: T | T[], callback: mapDept
     const skipContainer = () =>
         shouldSkip = true;
 
-    const recWalker = (node: T, parent: T, position: number[]) => {
+    const recWalker = (node: K | T, parent: T, position: number[]) => {
         callback(node, parent, number++, position.length, position, skipContainer);
 
         if (shouldSkip) {
@@ -25,19 +32,19 @@ export function depthFirst<T extends Recursive>(tree: T | T[], callback: mapDept
             return;
         }
 
-        if (!('containing' in node))
+        if (!isRecursive(node))
             return;
 
         const nodeCon = node.containing;
         for (let i = 0; i < nodeCon.length; i++)
-            recWalker(nodeCon[i] as T, node, [...position, i]);
+            recWalker(nodeCon[i] as K | T, node, [...position, i]);
     }
 
     for (let i = 0; i < tree.length; i++)
         recWalker(tree[i], undefined, [i]);
 }
 
-export async function depthFirstAsync<T extends Recursive>(tree: T | T[], callback: mapDepthFirstAsyncCB<T, void>) {
+export async function depthFirstAsync<K extends object, T extends Recursive<K>>(tree: T | T[], callback: MapDepthFirstCBAsync<K, T>) {
     if (!Array.isArray(tree))
         tree = [tree];
 
@@ -47,7 +54,7 @@ export async function depthFirstAsync<T extends Recursive>(tree: T | T[], callba
     const skipContainer = () =>
         shouldSkip = true;
 
-    const recWalker = async (node: T, parent: T, position: number[]) => {
+    const recWalker = async (node: K | T, parent: T, position: number[]) => {
         await callback(node, parent, number++, position.length, position, skipContainer);
 
         if (shouldSkip) {
@@ -55,19 +62,19 @@ export async function depthFirstAsync<T extends Recursive>(tree: T | T[], callba
             return;
         }
 
-        if (!('containing' in node))
+        if (!isRecursive(node))
             return;
 
         const nodeCon = node.containing;
         for (let i = 0; i < nodeCon.length; i++)
-            await recWalker(nodeCon[i] as T, node, [...position, i]);
+            await recWalker(nodeCon[i] as K | T, node, [...position, i]);
     }
 
     for (let i = 0; i < tree.length; i++)
         await recWalker(tree[i], undefined, [i]);
 }
 
-export function mapDepthFirst<T extends Recursive, M extends Recursive>(tree: T | T[], callback: mapDepthFirstCB<T, M>): M[] {
+export function mapDepthFirst<K extends object, T extends Recursive<K>, M extends T | K>(tree: T | T[], callback: MapDepthFirstCB<K, T, M>): M[] {
     if (!Array.isArray(tree))
         tree = [tree];
 
@@ -77,13 +84,13 @@ export function mapDepthFirst<T extends Recursive, M extends Recursive>(tree: T 
     const skipContainer = () =>
         shouldSkip = true;
 
-    const recWalker = (node: T, parent: T, position: number[]): M => {
+    const recWalker = (node: K | T, parent: T, position: number[]): M => {
         let repl = callback(node, parent, number++, position.length, position, skipContainer);
 
         if (node as any == repl as any)
             repl = {...repl};
 
-        if (!('containing' in repl))
+        if (!isRecursive(repl))
             return repl;
 
         if (shouldSkip) {
@@ -91,12 +98,12 @@ export function mapDepthFirst<T extends Recursive, M extends Recursive>(tree: T 
             return repl;
         }
 
-        if (('containing' in node)) {
+        if (isRecursive(node)) {
             const nodeCon = node.containing;
             const replCon = repl.containing = new Array(nodeCon.length);
 
             for (let i = 0; i < nodeCon.length; i++)
-                replCon[i] = recWalker(nodeCon[i] as T, node, [...position, i]);
+                replCon[i] = recWalker(nodeCon[i] as K | T, node, [...position, i]);
         } else {
             repl.containing = [];
         }
