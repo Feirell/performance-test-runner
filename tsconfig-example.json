@@ -3,9 +3,9 @@
     "module": "commonjs",
     "target": "ES2017",
     "outDir": "lib",
-    "declaration": true
+    "declaration": false
   },
   "files": [
-    "src/index.ts"
+    "src/example-tests.ts"
   ]
 }
