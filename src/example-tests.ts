@@ -1,7 +1,7 @@
 import {defaultTestSuite, measure, speed} from "./performance-test-suite";
 import {depthFirst, mapDepthFirst} from "./tree-walker";
-import {baselineBundleBasic} from "./baseline";
-import {printSuiteState} from "./suite-console-printer";
+import {ReplacePrinter} from "replace-printer";
+import {formatResultTable} from "./stringify-result-table";
 
 const tree = [
     {
@@ -48,11 +48,11 @@ measure('depthFirst', () => {
         });
     });
 
-    speed('map with json', () => {
-        const copied = JSON.parse(JSON.stringify(tree));
-        depthFirst(copied, () => {
-        });
-    })
+    // speed('map with json', () => {
+    //     const copied = JSON.parse(JSON.stringify(tree));
+    //     depthFirst(copied, () => {
+    //     });
+    // })
 });
 
 // baselineBundleBasic();
@@ -63,20 +63,45 @@ measure('depthFirst', () => {
     //         console.error(err);
     //         process.exit(1);
     //     });
+    let cc: Console;
+    let rc: Console;
 
-    console.log('run first time')
-    const firstLogger = printSuiteState(defaultTestSuite);
-    const firstRun = defaultTestSuite.runSuite();
+    const rp1 = new ReplacePrinter();
 
-    await firstLogger;
-    await firstRun;
+    cc = rp1.continuesConsole;
+    rc = rp1.replaceConsole;
 
-    console.log('run second time');
-    const secondLogger = printSuiteState(defaultTestSuite);
-    const secondRun = defaultTestSuite.runSuite();
+    const logState = () => rc.log(formatResultTable(defaultTestSuite.extractTestResults()));
 
-    await secondLogger;
-    await secondRun;
+    /*
+    'suite-started'
+    'benchmark-cycle'
+    'benchmark-started'
+    'benchmark-error'
+    'benchmark-finished'
+    'suite-error'
+    'suite-finished'
+     */
+
+    defaultTestSuite.addListener('suite-started', logState);
+    defaultTestSuite.addListener('benchmark-started', logState);
+    defaultTestSuite.addListener('benchmark-cycle', logState);
+    defaultTestSuite.addListener('benchmark-finished', logState);
+    defaultTestSuite.addListener('suite-finished', logState);
+
+    // const firstLogger = printSuiteState(defaultTestSuite);
+    cc.log('run first time');
+    await defaultTestSuite.runSuite();
+
+    console.log('\n');
+    const rp2 = new ReplacePrinter();
+
+    cc = rp2.continuesConsole;
+    rc = rp2.replaceConsole;
+
+
+    cc.log('run second time');
+    await defaultTestSuite.runSuite();
 })()
     .catch(err => {
         console.error('encountered an error while running example tests', err);

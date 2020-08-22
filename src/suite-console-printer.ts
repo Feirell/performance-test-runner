@@ -31,7 +31,8 @@ export function printSuiteState(suite: PerformanceTestSuite, {
         // TODO remove isLast and let update accept arguments
         let isLast = false;
         const update = createThrottle(() => {
-            replaceConsole.log(formatResultTable(suite.extractTestResults()) + (isLast ? '\n' : ''))
+            // replaceConsole.log(formatResultTable(suite.extractTestResults()) + (isLast ? '\n' : ''))
+            replaceConsole.log(formatResultTable(suite.extractTestResults()))
         }, frameTime);
 
         suite.on('suite-started', () => {

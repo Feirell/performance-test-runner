@@ -38,6 +38,37 @@ export interface BenchmarkEvent<K extends object = any> extends SuiteEvent<K> {
     associatedTest: Readonly<SpeedTest>;
 }
 
+// MEASUREMENT RESULTS
+
+interface SpeedTestResult {
+    type: 'header' | 'measurements',
+    name: string,
+}
+
+interface SPTRMeasurement extends SpeedTestResult {
+    type: 'measurements',
+    state: 'initialized' | 'running' | 'finished';
+}
+
+interface SPTRMeasurementInitialized extends SPTRMeasurement {
+    type: 'measurements',
+    state: 'initialized';
+    name: string,
+}
+
+interface SPTRMeasurementsRunningFinished extends SPTRMeasurement {
+    type: 'measurements',
+    state: 'running' | 'finished';
+    hz: number;
+    rme: number;
+    samples: number;
+}
+
+interface SPTRGroup extends SpeedTestResult {
+    type: 'header',
+    containing: (SPTRGroup | SPTRMeasurementInitialized | SPTRMeasurementsRunningFinished)[]
+}
+
 export class PerformanceTestSuite extends EventEmitter {
     suiteRunning = false;
     runnedTestAlready = false;
@@ -101,7 +132,7 @@ export class PerformanceTestSuite extends EventEmitter {
     }
 
     public extractTestResults() {
-        return mapDepthFirst<SpeedTest, MeasureGroup, any>(this.testTree, (elem): PossibleTableFormatterTypes => {
+        return mapDepthFirst<SpeedTest, MeasureGroup, SPTRMeasurementInitialized | SPTRMeasurementsRunningFinished, SPTRGroup>(this.testTree, (elem): PossibleTableFormatterTypes => {
             if (elem.type == 'measure') {
                 return {type: 'header', name: elem.title, containing: []};
             } else {
