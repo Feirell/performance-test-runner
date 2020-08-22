@@ -1,4 +1,3 @@
-import * as process from 'process';
 import {EventEmitter} from 'events';
 import * as Benchmark from 'Benchmark';
 
@@ -102,7 +101,7 @@ export class PerformanceTestSuite extends EventEmitter {
     }
 
     public extractTestResults() {
-        return mapDepthFirst(this.testTree as (MeasureGroup | SpeedTest)[], (elem): PossibleTableFormatterTypes => {
+        return mapDepthFirst<SpeedTest, MeasureGroup, any>(this.testTree, (elem): PossibleTableFormatterTypes => {
             if (elem.type == 'measure') {
                 return {type: 'header', name: elem.title, containing: []};
             } else {
@@ -148,7 +147,7 @@ export class PerformanceTestSuite extends EventEmitter {
             return false;
 
         if (clearPreviousResults) {
-            depthFirst<MeasureGroup | SpeedTest>(this.testTree, (elem, parent) => {
+            depthFirst<SpeedTest, MeasureGroup>(this.testTree, (elem, parent) => {
                 if (elem.type == 'measure')
                     return;
 
@@ -166,7 +165,7 @@ export class PerformanceTestSuite extends EventEmitter {
         } as SuiteEvent);
 
         try {
-            await depthFirstAsync<MeasureGroup | SpeedTest>(this.testTree, async (elem, parent) => {
+            await depthFirstAsync<SpeedTest, MeasureGroup>(this.testTree, async (elem, parent) => {
                 if (elem.type == 'measure')
                     return;
 
