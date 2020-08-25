@@ -1,6 +1,10 @@
-import {defaultTestSuite, measure, speed} from "../src/performance-test-suite";
-import {printSuiteState} from "../src/suite-console-printer";
-import {baselineBundleBasic} from "../src/baseline";
+# performance-test-runner
+
+<!-- USEFILE: examples\example-tests.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+``` ts
+import {defaultTestSuite, measure, speed} from "performance-test-runner/src/performance-test-suite";
+import {printSuiteState} from "performance-test-runner/src/suite-console-printer";
+import {baselineBundleBasic} from "performance-test-runner/src/baseline";
 
 measure('object manipulation', () => {
     speed('delete', () => {
@@ -65,3 +69,6 @@ baselineBundleBasic();
     })
 
 
+
+```
+*You can find this in `examples\example-tests.ts`*
