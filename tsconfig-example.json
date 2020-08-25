@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "ES2017",
-    "outDir": "lib",
+    "target": "ES2018",
+    "outDir": "lib-examples",
     "declaration": false
   },
   "files": [
-    "src/example-tests.ts"
+    "examples/example-tests.ts"
   ]
 }

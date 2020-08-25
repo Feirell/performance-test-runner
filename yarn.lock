@@ -20,22 +20,40 @@ benchmark@^2.1.4:
     lodash "^4.17.4"
     platform "^1.3.3"
 
+chainable-error@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/chainable-error/-/chainable-error-1.0.1.tgz#bd073ee0184e86ed85993eedf6975efe380c8e70"
+  integrity sha512-vfKStDqOD1HeCCGrUyBVDg7sptuHjOwXG0e3CJQka/OyfYIEGaBCxYV+c9EqqZFVVnpOyrXiApM4m0feVPCcig==
+
+insert-filecontent-into-markdown@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/insert-filecontent-into-markdown/-/insert-filecontent-into-markdown-2.0.0.tgz#69cb91e4bd9763ab4925d65f78df577b9c03fb60"
+  integrity sha512-gOjQUtav9FS/Eh2YhutEEcUQzaMI7X4VcrxQ6+XNVx0yJVxlkSctjK9NUYQ/OnhALQoGjtPscEw5whitMLLJUw==
+  dependencies:
+    chainable-error "^1.0.0"
+    minimist "^1.2.0"
+
 lodash@^4.17.4:
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+
+minimist@^1.2.0:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
+  integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
 platform@^1.3.3:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
   integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
 
-replace-printer@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/replace-printer/-/replace-printer-1.0.0.tgz#ffb2b8c7b4b60bcf1d57f2b428debe97dd74c538"
-  integrity sha512-NmJgGbN3VxU+K9Huc0EY4aZbUp7oeGidTFGls09S6ciN6NHIDIHtj8xQSIgHlrs3xJPY1KoW3juLdWNYazpaeA==
+replace-printer@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/replace-printer/-/replace-printer-1.1.1.tgz#b1cd363a548f8782164ad76ccee9233c1750bd47"
+  integrity sha512-hp6hl8yyelOeUOBMGpO06QRIwjtAFbNL9fx+H11Y/eAr8U9IrGBeZ5OWQs6lZ1W5Dx0DkiLEuOrPKMqVHiKrug==
 
-typescript@^3.9.3:
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.3.tgz#d3ac8883a97c26139e42df5e93eeece33d610b8a"
-  integrity sha512-D/wqnB2xzNFIcoBG9FG8cXRDjiqSTbG2wd8DMZeQyJlP1vfTkIxH4GKveWaEBYySKIg+USu+E+EDIR47SqnaMQ==
+typescript@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.2.tgz#7ea7c88777c723c681e33bf7988be5d008d05ac2"
+  integrity sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==

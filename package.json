@@ -3,16 +3,24 @@
   "version": "0.0.1",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "build-readme": "ifim template.README.md --add-location-notice",
+    "build-example": "tsc -p tsconfig-example.json",
+    "watch-example": "tsc -p tsconfig-example.json -w"
+  },
   "files": [
     "lib"
   ],
   "devDependencies": {
     "@types/benchmark": "^1.0.33",
     "@types/node": "12",
-    "typescript": "^3.9.3"
+    "insert-filecontent-into-markdown": "^2.0.0",
+    "typescript": "^4.0.2"
   },
   "dependencies": {
     "benchmark": "^2.1.4",
-    "replace-printer": "^1.0.0"
+    "replace-printer": "^1.1.1"
   }
 }

@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "ES2017",
+    "target": "ES2018",
     "outDir": "lib",
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true
   },
   "files": [
-    "src/index.ts"
+    "src/performance-test-suite.ts",
+    "src/baseline.ts",
+    "src/suite-console-printer.ts"
   ]
 }
