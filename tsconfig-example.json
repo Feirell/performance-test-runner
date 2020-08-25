@@ -5,7 +5,5 @@
     "outDir": "lib-examples",
     "declaration": false
   },
-  "files": [
-    "examples/example-tests.ts"
-  ]
+  "include": ["examples/*"]
 }

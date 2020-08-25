@@ -7,7 +7,7 @@
     "skipLibCheck": true
   },
   "files": [
-    "src/performance-test-suite.ts",
+    "src/performance-test-runner.ts",
     "src/baseline.ts",
     "src/suite-console-printer.ts"
   ]
