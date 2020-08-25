@@ -1,6 +1,5 @@
-import {defaultTestSuite, measure, speed} from "../src/performance-test-suite";
+import {defaultTestRunner, measure, speed} from "../src/performance-test-runner";
 import {printSuiteState} from "../src/suite-console-printer";
-import {baselineBundleBasic} from "../src/baseline";
 
 measure('object manipulation', () => {
     speed('delete', () => {
@@ -11,6 +10,8 @@ measure('object manipulation', () => {
     }, () => {
         // This is the actual test
         var obj; // just to make your IDE / TypeScript know that obj is present
+
+        throw new Error('This is a error');
 
         delete obj.attr;
     }, () => {
@@ -34,34 +35,16 @@ measure('object manipulation', () => {
     })
 });
 
-measure('copy array', () => {
-    const arr = new Array(200).fill(0);
-    delete arr[100];
-
-    speed('slice', () => {
-        arr.slice();
-    });
-
-    speed('array of', () => {
-        Array.from(arr); // can not handle empty slots (EMPTY => undefined)
-    });
-
-    speed('spread', () => {
-        [...arr]; // can not handle empty slots (EMPTY => undefined)
-    });
-});
-
-baselineBundleBasic();
-
 (async () => {
-    const firstLogger = printSuiteState(defaultTestSuite, {printOnCycle: true, framerate: 30});
-    await defaultTestSuite.runSuite();
+    const firstLogger = printSuiteState(defaultTestRunner, {printOnCycle: true, framerate: 30});
+    await defaultTestRunner.runSuite();
     await firstLogger;
 })()
     .catch(err => {
-        const errMsg = 'message' in err ? err.message : err;
-        console.error('encountered an error while running example tests\n' + errMsg);
+        let actualError = err;
+        if (err.type == 'error')
+            actualError = err.message;
+
+        console.error(actualError);
         process.exit(1);
     })
-
-
