@@ -1,8 +1,8 @@
 {
   "name": "performance-test-runner",
   "version": "0.0.1",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/performance-test-runner.js",
+  "types": "lib/performance-test-runner.d.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -13,6 +13,7 @@
   "files": [
     "lib"
   ],
+  "repository": "https://github.com/Feirell/performance-test-runner.git",
   "devDependencies": {
     "@types/benchmark": "^1.0.33",
     "@types/node": "12",
