@@ -28,7 +28,7 @@ const noop = () => {
 export interface SuiteEvent<K extends object = any> {
     timestamp: number;
     type: string,
-    suite: PerformanceTestSuite;
+    suite: PerformanceTestRunner;
     eventData: K;
 }
 
@@ -74,7 +74,7 @@ export type AllSPTRTypes =
     SPTRMeasurementsRunningFinished |
     SPTRGroup;
 
-export class PerformanceTestSuite extends EventEmitter {
+export class PerformanceTestRunner extends EventEmitter {
     private suiteRunning = false;
 
     private callStack: MeasureGroup[] = [];
@@ -269,7 +269,7 @@ export class PerformanceTestSuite extends EventEmitter {
 
 }
 
-export const defaultTestSuite = new PerformanceTestSuite();
+export const defaultTestRunner = new PerformanceTestRunner();
 
-export const measure = defaultTestSuite.measure;
-export const speed = defaultTestSuite.speed;
+export const measure = defaultTestRunner.measure;
+export const speed = defaultTestRunner.speed;

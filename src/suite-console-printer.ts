@@ -1,12 +1,12 @@
 import {ReplacePrinter} from "replace-printer";
 
-import {defaultTestSuite, PerformanceTestSuite} from "./performance-test-suite";
+import {PerformanceTestRunner} from "./performance-test-runner";
 import {formatResultTable} from "./stringify-result-table";
 import {createThrottle} from "./throttle";
 
 let otherIsRunning = false;
 
-export function printSuiteState(suite: PerformanceTestSuite, {
+export function printSuiteState(suite: PerformanceTestRunner, {
     printOnCycle = true,
     framerate = 30
 } = {}, {
@@ -29,20 +29,20 @@ export function printSuiteState(suite: PerformanceTestSuite, {
             frameTime = 1000 / framerate;
 
         const logState = () =>
-            rc.log(formatResultTable(defaultTestSuite.extractTestResults()));
+            rc.log(formatResultTable(suite.extractTestResults()));
 
         const update = createThrottle(logState, frameTime);
 
-        defaultTestSuite.addListener('suite-started', () => update());
+        suite.addListener('suite-started', () => update());
 
-        defaultTestSuite.addListener('benchmark-started', () => update());
+        suite.addListener('benchmark-started', () => update());
 
         if (printOnCycle)
-            defaultTestSuite.addListener('benchmark-cycle', () => update());
+            suite.addListener('benchmark-cycle', () => update());
 
-        defaultTestSuite.addListener('benchmark-error', (err) => (update(), cc.error(err)));
+        suite.addListener('benchmark-error', (err) => (update(), cc.error(err)));
 
-        defaultTestSuite.addListener('benchmark-finished', () => update());
+        suite.addListener('benchmark-finished', () => update());
 
         const closeWithEOL = () =>
             process.stdout.write('\n')
@@ -50,13 +50,13 @@ export function printSuiteState(suite: PerformanceTestSuite, {
         // TODO try to resolve the bug with multiple suites (and suite console printers) which have line breaking issues
         // so that the closeWithEOL is not needed anymore
 
-        defaultTestSuite.addListener('suite-error', ({eventData: error}) => {
+        suite.addListener('suite-error', ({eventData: error}) => {
             cc.error(error);
             update(true)
                 .then(() => (closeWithEOL(), rej(error)));
         });
 
-        defaultTestSuite.addListener('suite-finished', () => {
+        suite.addListener('suite-finished', () => {
             update(true)
                 .then(() => (closeWithEOL(), res()));
         });

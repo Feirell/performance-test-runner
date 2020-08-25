@@ -1,4 +1,4 @@
-import {measure as defaultMeasure, speed as defaultSpeed} from "./performance-test-suite";
+import {measure as defaultMeasure, speed as defaultSpeed} from "./performance-test-runner";
 
 export function baselineFunctionFor(speed = defaultSpeed) {
     speed('for', () => {

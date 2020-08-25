@@ -1,5 +1,5 @@
 import {depthFirst} from "./tree-walker";
-import {SPTRGroup, SPTRMeasurementInitialized, SPTRMeasurementsRunningFinished} from "./performance-test-suite";
+import {SPTRGroup, SPTRMeasurementInitialized, SPTRMeasurementsRunningFinished} from "./performance-test-runner";
 
 const fmrNoFrac = Intl.NumberFormat('en-US', {
     maximumFractionDigits: 0,
