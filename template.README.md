@@ -6,23 +6,23 @@ This package exposes one main class `PerformanceTestRunner` which has two centra
 
 For example if you wanted to test whether `performance.now` or `Date.now` is faster you could create you benchmarks like this:
 
-<!-- USEFILE: examples\simple-tests.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\simple-tests.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
 ## defaultTestRunner
 
 The exported `measure` and `speed` belong to the also exported default `defaultTestRunner` which you can use but there is no need to use those.
 
-<!-- USEFILE: examples\create-own.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\create-own.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
 The default runner is handy to spread your definition on multiple files like this.
 
-<!-- USEFILE: examples\spread-definition.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\spread-definition.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
 ## presenting results
 
 `PerformanceTestRunner::extractTestResults` returns a graph similar to the graph resulting from the `measure` and `speed` calls. But this package provides utility to format those results in a more readable format.
 
-<!-- USEFILE: examples\log-results.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\log-results.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
 This is the simplest way to log the performance measurements in realtime. If you do not need realtime logging you can just use the `formatResultTable(runner.extractTestResults())` function.
 
@@ -34,7 +34,7 @@ Benchmark will concat the code in the teardown, setup and teardown functions wit
 
 As shown in this example you need to import / require you external functions inside the setup function to use that again. To help your IDE / TypeScript with this behavior you can use `var` since it does not raise a syntax exception when you redeclare and identifier.
 
-<!-- USEFILE: examples\setup-teardown.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\setup-teardown.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
 ## submitting issues
  

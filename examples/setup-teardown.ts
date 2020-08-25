@@ -47,4 +47,4 @@ measure('object manipulation', () => {
 
         console.error(actualError);
         process.exit(1);
-    })
+    });

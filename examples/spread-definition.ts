@@ -15,4 +15,4 @@ import {defaultTestRunner} from '../src/performance-test-runner';
 
         console.error(actualError);
         process.exit(1);
-    })
+    });

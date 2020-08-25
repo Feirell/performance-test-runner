@@ -16,4 +16,4 @@ baselineBundleBasic();
 
         console.error(actualError);
         process.exit(1);
-    })
+    });

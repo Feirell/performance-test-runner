@@ -6,9 +6,9 @@ This package exposes one main class `PerformanceTestRunner` which has two centra
 
 For example if you wanted to test whether `performance.now` or `Date.now` is faster you could create you benchmarks like this:
 
-<!-- USEFILE: examples\simple-tests.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\simple-tests.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 ``` ts
-import {defaultTestRunner, measure, speed} from "performance-test-runner/src/performance-test-runner";
+import {defaultTestRunner, measure, speed} from "performance-test-runner";
 import {performance} from "perf_hooks";
 
 measure('timestamp', () => {
@@ -32,7 +32,7 @@ measure('timestamp', () => {
 
         console.error(actualError);
         process.exit(1);
-    })
+    });
 ```
 *You can find this in `examples\simple-tests.ts`*
 
@@ -40,9 +40,9 @@ measure('timestamp', () => {
 
 The exported `measure` and `speed` belong to the also exported default `defaultTestRunner` which you can use but there is no need to use those.
 
-<!-- USEFILE: examples\create-own.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\create-own.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 ``` ts
-import {PerformanceTestRunner} from "performance-test-runner/src/performance-test-runner";
+import {PerformanceTestRunner} from "performance-test-runner";
 import {performance} from "perf_hooks";
 
 const ptr = new PerformanceTestRunner();
@@ -69,19 +69,19 @@ measure('timestamp', () => {
 
         console.error(actualError);
         process.exit(1);
-    })
+    });
 ```
 *You can find this in `examples\create-own.ts`*
 
 The default runner is handy to spread your definition on multiple files like this.
 
-<!-- USEFILE: examples\spread-definition.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\spread-definition.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 ``` ts
 import 'test-for-feature-a';
 import 'test-for-feature-b';
 import 'test-for-feature-c';
 
-import {defaultTestRunner} from 'performance-test-runner/src/performance-test-runner';
+import {defaultTestRunner} from 'performance-test-runner';
 
 (async () => {
     await defaultTestRunner.runSuite();
@@ -94,7 +94,7 @@ import {defaultTestRunner} from 'performance-test-runner/src/performance-test-ru
 
         console.error(actualError);
         process.exit(1);
-    })
+    });
 ```
 *You can find this in `examples\spread-definition.ts`*
 
@@ -102,11 +102,11 @@ import {defaultTestRunner} from 'performance-test-runner/src/performance-test-ru
 
 `PerformanceTestRunner::extractTestResults` returns a graph similar to the graph resulting from the `measure` and `speed` calls. But this package provides utility to format those results in a more readable format.
 
-<!-- USEFILE: examples\log-results.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\log-results.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 ``` ts
-import {defaultTestRunner, measure, speed} from "performance-test-runner/src/performance-test-runner";
-import {printSuiteState} from "performance-test-runner/src/suite-console-printer";
-import {formatResultTable} from "performance-test-runner/src/stringify-result-table";
+import {defaultTestRunner, measure, speed} from "performance-test-runner";
+import {printSuiteState} from "performance-test-runner/lib/suite-console-printer";
+import {formatResultTable} from "performance-test-runner/lib/stringify-result-table";
 
 measure('copy array', () => {
     const arr = new Array(200).fill(0);
@@ -142,10 +142,7 @@ measure('copy array', () => {
 
         console.error(actualError);
         process.exit(1);
-    })
-
-
-
+    });
 ```
 *You can find this in `examples\log-results.ts`*
 
@@ -159,10 +156,10 @@ Benchmark will concat the code in the teardown, setup and teardown functions wit
 
 As shown in this example you need to import / require you external functions inside the setup function to use that again. To help your IDE / TypeScript with this behavior you can use `var` since it does not raise a syntax exception when you redeclare and identifier.
 
-<!-- USEFILE: examples\setup-teardown.ts; str => str.replace(/\.\.\//g, 'performance-test-runner/') -->
+<!-- USEFILE: examples\setup-teardown.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 ``` ts
-import {defaultTestRunner, measure, speed} from "performance-test-runner/src/performance-test-runner";
-import {printSuiteState} from "performance-test-runner/src/suite-console-printer";
+import {defaultTestRunner, measure, speed} from "performance-test-runner";
+import {printSuiteState} from "performance-test-runner/lib/suite-console-printer";
 
 measure('object manipulation', () => {
     speed('delete', () => {
@@ -210,8 +207,7 @@ measure('object manipulation', () => {
 
         console.error(actualError);
         process.exit(1);
-    })
-
+    });
 ```
 *You can find this in `examples\setup-teardown.ts`*
 
