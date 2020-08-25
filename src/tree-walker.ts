@@ -4,15 +4,15 @@ interface Recursive<K> {
     containing: (Recursive<K> | K)[];
 }
 
-type MapDepthFirstCB<K, T extends Recursive<K>, M = void, L extends Recursive<M> = Recursive<M>> = (current: T | K, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void) => M | L;
+type MapDepthFirstCB<K, T extends Recursive<K> = Recursive<K>, M = void, L extends Recursive<M> = Recursive<M>> = (current: T | K, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void) => M | L;
 
 
-type MapDepthFirstCBAsync<K, T extends Recursive<K>, M = void, L extends Recursive<M> = Recursive<M>> = (current: T | K, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void) => Promise<M | L>;
+type MapDepthFirstCBAsync<K, T extends Recursive<K> = Recursive<K>, M = void, L extends Recursive<M> = Recursive<M>> = (current: T | K, parent: T, number: number, depth: number, fullPoint: number[], skipContainer: () => void) => Promise<M | L>;
 
 
 const isRecursive = <U>(o: Recursive<U> | U): o is Recursive<U> => 'containing' in o;
 
-export function depthFirst<K, T extends Recursive<K>>(tree: T | T[], callback: MapDepthFirstCB<K, T>) {
+export function depthFirst<K, T extends Recursive<K> = Recursive<K>>(tree: T | T[], callback: MapDepthFirstCB<K, T>) {
     if (!Array.isArray(tree))
         tree = [tree];
 
@@ -42,7 +42,7 @@ export function depthFirst<K, T extends Recursive<K>>(tree: T | T[], callback: M
         recWalker(tree[i], undefined, [i]);
 }
 
-export async function depthFirstAsync<K, T extends Recursive<K>>(tree: T | T[], callback: MapDepthFirstCBAsync<K, T>) {
+export async function depthFirstAsync<K, T extends Recursive<K> = Recursive<K>>(tree: T | T[], callback: MapDepthFirstCBAsync<K, T>) {
     if (!Array.isArray(tree))
         tree = [tree];
 
@@ -72,7 +72,7 @@ export async function depthFirstAsync<K, T extends Recursive<K>>(tree: T | T[], 
         await recWalker(tree[i], undefined, [i]);
 }
 
-export function mapDepthFirst<K, T extends Recursive<K>, M = any, L extends Recursive<M> = Recursive<M>>(tree: T | T[], callback: MapDepthFirstCB<K, T, M, L>): M[] {
+export function mapDepthFirst<K, T extends Recursive<K> = Recursive<K>, M = any, L extends Recursive<M> = Recursive<M>>(tree: T | T[], callback: MapDepthFirstCB<K, T, M, L>): M[] {
     if (!Array.isArray(tree))
         tree = [tree];
 

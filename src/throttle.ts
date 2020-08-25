@@ -1,15 +1,34 @@
-export function createThrottle(action: () => void, desiredTimout: number) {
+export function createThrottle<T extends () => void>(action: T, desiredTimout: number) {
     let promiseRes = [];
+    let promiseRej = [];
+
     let timeoutId = undefined;
     let appointedNextCallTS = undefined;
 
     let actionNeeded = false;
 
+    let lastCallArgs: Parameters<T> = undefined;
+
     const doAction = () => {
-        action();
+        try {
+            action.apply(undefined, lastCallArgs);
+        } catch (err) {
+            for (const rej of promiseRej)
+                try {
+                    rej(err);
+                } catch (e) {
+                    console.error(e);
+                }
+
+            promiseRej = [];
+        }
 
         for (const res of promiseRes)
-            res();
+            try {
+                res();
+            } catch (e) {
+                console.error(e);
+            }
 
         promiseRes = [];
     }
@@ -48,10 +67,12 @@ export function createThrottle(action: () => void, desiredTimout: number) {
         }, calibratedTimeout);
     }
 
-    return (printImmediately = false) => new Promise((res, rej) => {
+    return (doImmediately = false, ...param: Parameters<T>) => new Promise<void>((res, rej) => {
+        lastCallArgs = param;
         promiseRes.push(res);
+        promiseRej.push(rej);
 
-        if (printImmediately) {
+        if (doImmediately) {
             if (timeoutId)
                 clearTimeout(timeoutId);
 

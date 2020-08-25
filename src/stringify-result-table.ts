@@ -1,41 +1,27 @@
 import {depthFirst} from "./tree-walker";
+import {SPTRGroup, SPTRMeasurementInitialized, SPTRMeasurementsRunningFinished} from "./performance-test-suite";
 
-export interface Header {
-    type: 'header'
-    name: string;
-    containing: (Header | PerformanceRowUnevaluated | PerformanceRowEvaluated)[];
-}
+const fmrNoFrac = Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0,
+    useGrouping: true
+}).format;
 
-export interface PerformanceRowUnevaluated {
-    type: 'measurements'
-    name: string;
-    state: 'initialized';
-}
-
-export interface PerformanceRowEvaluated {
-    type: 'measurements'
-    name: string;
-    state: 'running' | 'finished';
-    hz: number;
-    rme: number;
-    samples: number;
-}
-
-export type PossibleTableFormatterTypes = Header | PerformanceRowEvaluated | PerformanceRowUnevaluated;
-
-const fmrNoFrac = Intl.NumberFormat('en-US', {maximumFractionDigits: 0, useGrouping: true}).format;
 const fmrFrac = Intl.NumberFormat('en-US', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
     useGrouping: true
 }).format;
 
-export function formatResultTable(outputTree: PossibleTableFormatterTypes[], nodata = '--', indent = '  ') {
+export type PossibleTableFormatterTypes =
+    SPTRMeasurementInitialized |
+    SPTRMeasurementsRunningFinished |
+    SPTRGroup;
+
+export function formatResultTable(outputTree: SPTRGroup[], nodata = '--', indent = '  ') {
     // name, ops/sec, MoE, samples, relative
 
     // index is the depth, the value is the number which is ready to compare
     const readyToComp: number[] = [];
-    // 'initialized' | 'running' | 'finished'
 
     let rows: (string | string[])[] = [['', 'ops/sec', 'MoE', 'samples', 'relative']];
     const columnLeftAlignment = [true, false, false, false];
@@ -44,9 +30,10 @@ export function formatResultTable(outputTree: PossibleTableFormatterTypes[], nod
     for (let i = 0; i < 5; i++)
         minRowSize[i] = Math.max(rows[0][i].length, minRowSize[i]);
 
-    depthFirst(outputTree, (e, p: Header, number, depth) => {
-        if (e.type != "header")
+    depthFirst<SPTRMeasurementInitialized | SPTRMeasurementsRunningFinished, SPTRGroup>(outputTree, (e, p, number, depth) => {
+        if (e.type != 'group')
             return;
+
         rows.push(indent.repeat(depth - 1) + e.name);
 
         let minHz;
@@ -87,6 +74,8 @@ export function formatResultTable(outputTree: PossibleTableFormatterTypes[], nod
 
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
+
+        // row which do not contain a string[] but a string are header rows
         if (typeof row == 'string')
             continue;
 

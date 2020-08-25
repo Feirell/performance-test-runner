@@ -1,21 +1,21 @@
 import {ReplacePrinter} from "replace-printer";
 
-import {PerformanceTestSuite} from "./performance-test-suite";
+import {defaultTestSuite, PerformanceTestSuite} from "./performance-test-suite";
 import {formatResultTable} from "./stringify-result-table";
 import {createThrottle} from "./throttle";
 
 let otherIsRunning = false;
 
 export function printSuiteState(suite: PerformanceTestSuite, {
-    printOnCycle = false,
+    printOnCycle = true,
     framerate = 30
-} = {}) {
+} = {}, {
+                                    continuesConsole: cc,
+                                    replaceConsole: rc
+                                } = new ReplacePrinter()) {
     return new Promise((res, rej) => {
         if (otherIsRunning)
             throw new Error('another suite is being printed at the moment');
-
-        // deactivating the timeout since the output should be printed immediately
-        const {continuesConsole, replaceConsole} = new ReplacePrinter({throttleTimeout: 0});
 
         let frameTime = 1000 / 30;
 
@@ -28,37 +28,37 @@ export function printSuiteState(suite: PerformanceTestSuite, {
         else
             frameTime = 1000 / framerate;
 
-        // TODO remove isLast and let update accept arguments
-        let isLast = false;
-        const update = createThrottle(() => {
-            // replaceConsole.log(formatResultTable(suite.extractTestResults()) + (isLast ? '\n' : ''))
-            replaceConsole.log(formatResultTable(suite.extractTestResults()))
-        }, frameTime);
+        const logState = () =>
+            rc.log(formatResultTable(defaultTestSuite.extractTestResults()));
 
-        suite.on('suite-started', () => {
-            otherIsRunning = true;
-            update();
-        });
+        const update = createThrottle(logState, frameTime);
+
+        defaultTestSuite.addListener('suite-started', () => update());
+
+        defaultTestSuite.addListener('benchmark-started', () => update());
 
         if (printOnCycle)
-            suite.on('benchmark-cycle', () => {
-                update();
-            });
+            defaultTestSuite.addListener('benchmark-cycle', () => update());
 
-        suite.on('benchmark-finished', () => {
-            update();
+        defaultTestSuite.addListener('benchmark-error', (err) => (update(), cc.error(err)));
+
+        defaultTestSuite.addListener('benchmark-finished', () => update());
+
+        const closeWithEOL = () =>
+            process.stdout.write('\n')
+
+        // TODO try to resolve the bug with multiple suites (and suite console printers) which have line breaking issues
+        // so that the closeWithEOL is not needed anymore
+
+        defaultTestSuite.addListener('suite-error', ({eventData: error}) => {
+            cc.error(error);
+            update(true)
+                .then(() => (closeWithEOL(), rej(error)));
         });
 
-        suite.on('suite-finished', () => {
-            isLast = true;
+        defaultTestSuite.addListener('suite-finished', () => {
             update(true)
-                .then(() => res());
-        });
-
-        suite.on('suite-error', ({eventData}) => {
-            isLast = true;
-            update(true)
-                .then(() => rej(eventData));
+                .then(() => (closeWithEOL(), res()));
         });
     }).finally(() => {
         otherIsRunning = false

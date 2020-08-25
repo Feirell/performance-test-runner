@@ -41,7 +41,7 @@ export interface BenchmarkEvent<K extends object = any> extends SuiteEvent<K> {
 // MEASUREMENT RESULTS
 
 interface SpeedTestResult {
-    type: 'header' | 'measurements',
+    type: 'group' | 'measurements',
     name: string,
 }
 
@@ -50,13 +50,13 @@ interface SPTRMeasurement extends SpeedTestResult {
     state: 'initialized' | 'running' | 'finished';
 }
 
-interface SPTRMeasurementInitialized extends SPTRMeasurement {
+export interface SPTRMeasurementInitialized extends SPTRMeasurement {
     type: 'measurements',
     state: 'initialized';
     name: string,
 }
 
-interface SPTRMeasurementsRunningFinished extends SPTRMeasurement {
+export interface SPTRMeasurementsRunningFinished extends SPTRMeasurement {
     type: 'measurements',
     state: 'running' | 'finished';
     hz: number;
@@ -64,25 +64,31 @@ interface SPTRMeasurementsRunningFinished extends SPTRMeasurement {
     samples: number;
 }
 
-interface SPTRGroup extends SpeedTestResult {
-    type: 'header',
+export interface SPTRGroup extends SpeedTestResult {
+    type: 'group',
     containing: (SPTRGroup | SPTRMeasurementInitialized | SPTRMeasurementsRunningFinished)[]
 }
 
+export type AllSPTRTypes =
+    SPTRMeasurementInitialized |
+    SPTRMeasurementsRunningFinished |
+    SPTRGroup;
+
 export class PerformanceTestSuite extends EventEmitter {
-    suiteRunning = false;
-    runnedTestAlready = false;
+    private suiteRunning = false;
+
     private callStack: MeasureGroup[] = [];
     private testTree: MeasureGroup[] = [];
 
-    constructor(runTestsOnExit = false) {
+    constructor() {
         super();
+
         // to ensure that the extracted functions keep their context
         this.measure = this.measure.bind(this);
         this.speed = this.speed.bind(this);
     }
 
-    measure(title: string, fnc: () => any) {
+    public measure(title: string, fnc: () => any) {
         const currentMeasure: MeasureGroup = {
             type: "measure",
             title, containing: []
@@ -102,11 +108,11 @@ export class PerformanceTestSuite extends EventEmitter {
         this.callStack.pop();
     }
 
-    speed(title: string, test: () => any);
-    speed(title: string, setup: () => any, test: () => any);
-    speed(title: string, setup: () => any, test: () => any, teardown: () => {});
+    public speed(title: string, test: () => any);
+    public speed(title: string, setup: () => any, test: () => any);
+    public speed(title: string, setup: () => any, test: () => any, teardown: () => any);
 
-    speed(title: string, ...functions: (() => any)[]) {
+    public speed(title: string, ...functions: (() => any)[]) {
         if (functions.length < 1)
             throw new Error('at least the test function needs to be defined');
 
@@ -132,9 +138,9 @@ export class PerformanceTestSuite extends EventEmitter {
     }
 
     public extractTestResults() {
-        return mapDepthFirst<SpeedTest, MeasureGroup, SPTRMeasurementInitialized | SPTRMeasurementsRunningFinished, SPTRGroup>(this.testTree, (elem): PossibleTableFormatterTypes => {
+        return mapDepthFirst<SpeedTest, MeasureGroup, SPTRMeasurementInitialized | SPTRMeasurementsRunningFinished, SPTRGroup>(this.testTree, (elem): AllSPTRTypes => {
             if (elem.type == 'measure') {
-                return {type: 'header', name: elem.title, containing: []};
+                return {type: 'group', name: elem.title, containing: []};
             } else {
                 const bench = elem.benchmark;
 
@@ -161,39 +167,58 @@ export class PerformanceTestSuite extends EventEmitter {
                     };
                 }
             }
+        }) as unknown as SPTRGroup[]; // first level of the array will always only contain SPTRGroups
+    }
+
+    public clearResults() {
+        if (this.suiteRunning)
+            return false;
+
+        depthFirst<SpeedTest, MeasureGroup>(this.testTree, (elem, parent) => {
+            if (elem.type == 'measure')
+                return;
+
+            elem.benchmark = undefined;
         });
+
+        return true;
     }
 
-    public stringifySuite() {
-        return formatResultTable(this.extractTestResults());
+    private emitSuiteEvent(ev: 'suite-started' | 'suite-error' | 'suite-finished', eventData: any = undefined) {
+        this.emit(ev, {
+            type: ev,
+            timestamp: Date.now(),
+            suite: this,
+            eventData
+        } as SuiteEvent);
     }
 
-    async runSuite({
-                       clearPreviousResults = true
-                   } = {}) {
+    private emitBenchmarkEvent(ev: 'benchmark-started' | 'benchmark-cycle' | 'benchmark-error' | 'benchmark-finished',
+                               ag: MeasureGroup, at: SpeedTest, bench: Benchmark, eventData: any = undefined) {
+        this.emit(ev, {
+            type: ev,
+            timestamp: Date.now(),
+            suite: this,
+            associatedGroup: ag,
+            associatedTest: at,
+            benchmark: bench,
+            eventData: eventData
+        } as BenchmarkEvent);
+    }
+
+    async runSuite({clearPreviousResults = true} = {}) {
         if (this.testTree.length == 0)
             return false;
 
         if (this.suiteRunning)
             return false;
 
-        if (clearPreviousResults) {
-            depthFirst<SpeedTest, MeasureGroup>(this.testTree, (elem, parent) => {
-                if (elem.type == 'measure')
-                    return;
-
-                elem.benchmark = undefined;
-            })
-        }
+        if (clearPreviousResults)
+            this.clearResults();
 
         this.suiteRunning = true;
 
-        this.emit('suite-started', {
-            timestamp: Date.now(),
-            type: 'suite-started',
-            suite: this,
-            eventData: undefined
-        } as SuiteEvent);
+        this.emitSuiteEvent('suite-started');
 
         try {
             await depthFirstAsync<SpeedTest, MeasureGroup>(this.testTree, async (elem, parent) => {
@@ -204,89 +229,47 @@ export class PerformanceTestSuite extends EventEmitter {
 
                 let bench: Benchmark;
 
-                const onCycle = (arg: any) => this.emit('benchmark-cycle', {
-                    timestamp: Date.now(),
-                    type: 'benchmark-cycle',
-                    suite: this,
-                    associatedGroup: parent as MeasureGroup,
-                    benchmark: bench,
-                    associatedTest: elem,
-                    eventData: arg
-                } as BenchmarkEvent);
-
                 const benchPromise = new Promise((res, rej) => {
                     bench = new Benchmark({
                         setup, fn, teardown, async: true,
                         onError: rej,
                         onComplete: res,
-                        onCycle,
+                        onCycle: (ev: any) => this.emitBenchmarkEvent('benchmark-cycle', parent, elem, bench, ev),
                     });
                 });
 
                 elem.benchmark = bench;
                 bench.run();
 
-                this.emit('benchmark-started', {
-                    timestamp: Date.now(),
-                    type: 'benchmark-started',
-                    suite: this,
-                    associatedGroup: parent as MeasureGroup,
-                    benchmark: bench,
-                    associatedTest: elem,
-                    eventData: undefined
-                } as BenchmarkEvent);
+                this.emitBenchmarkEvent('benchmark-started', parent, elem, bench);
 
                 try {
                     await benchPromise;
                 } catch (err) {
                     this.suiteRunning = false;
-
-                    this.emit('benchmark-error', {
-                        timestamp: Date.now(),
-                        type: 'benchmark-error',
-                        suite: this,
-                        associatedGroup: parent as MeasureGroup,
-                        benchmark: bench,
-                        associatedTest: elem,
-                        eventData: err
-                    } as BenchmarkEvent)
+                    this.emitBenchmarkEvent('benchmark-error', parent, elem, bench, err);
 
                     throw err;
                 }
-                this.emit('benchmark-finished', {
-                    timestamp: Date.now(),
-                    type: 'benchmark-finished',
-                    suite: this,
-                    associatedGroup: parent as MeasureGroup,
-                    benchmark: bench,
-                    associatedTest: elem,
-                    eventData: undefined
-                } as BenchmarkEvent);
+
+                this.emitBenchmarkEvent('benchmark-finished', parent, elem, bench);
             });
         } catch (err) {
-            this.emit('suite-error', {
-                timestamp: Date.now(),
-                type: 'suite-error',
-                suite: this,
-                eventData: err
-            } as SuiteEvent);
-
+            this.suiteRunning = false;
+            this.emitSuiteEvent('suite-error', err);
             throw err;
         }
 
         this.suiteRunning = false;
-        this.emit('suite-finished', {
-            timestamp: Date.now(),
-            type: 'suite-finished',
-            suite: this,
-            eventData: undefined
-        } as SuiteEvent);
+        this.emitSuiteEvent('suite-finished');
 
         return true;
     }
+
+
 }
 
-export const defaultTestSuite = new PerformanceTestSuite(true);
+export const defaultTestSuite = new PerformanceTestSuite();
 
 export const measure = defaultTestSuite.measure;
 export const speed = defaultTestSuite.speed;

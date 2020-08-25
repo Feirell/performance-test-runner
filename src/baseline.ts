@@ -78,7 +78,7 @@ export function baselineFunctionAddition(speed = defaultSpeed) {
 }
 
 export function baselineBundleBasic(measure = defaultMeasure, speed = defaultSpeed) {
-    measure('basline: basic bundle', () => {
+    measure('baseline: basic bundle', () => {
         baselineFunctionFor(speed);
         baselineFunctionArraySpread(speed);
         baselineFunctionWalkProto(speed);
