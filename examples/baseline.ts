@@ -1,6 +1,18 @@
 import {baselineBundleBasic} from "../src/baseline";
 import {printSuiteState} from "../src/suite-console-printer";
-import {defaultTestRunner} from "../src/performance-test-runner";
+import {defaultTestRunner, speed, measure} from "../src/performance-test-runner";
+import {performance} from "perf_hooks";
+
+measure('timestamp', () => {
+    speed('performance.now', () => {
+        performance.now();
+    });
+
+    speed('Date.now', () => {
+        Date.now();
+    });
+});
+
 
 baselineBundleBasic();
 
