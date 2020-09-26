@@ -11,8 +11,6 @@ measure('object manipulation', () => {
         // This is the actual test
         var obj; // just to make your IDE / TypeScript know that obj is present
 
-        throw new Error('This is a error');
-
         delete obj.attr;
     }, () => {
         // This is the teardown
@@ -36,9 +34,14 @@ measure('object manipulation', () => {
 });
 
 (async () => {
+    // you can also run the suite twice
     const firstLogger = printSuiteState(defaultTestRunner, {printOnCycle: true, framerate: 30});
     await defaultTestRunner.runSuite();
     await firstLogger;
+
+    const secondLogger = printSuiteState(defaultTestRunner, {printOnCycle: true, framerate: 30});
+    await defaultTestRunner.runSuite();
+    await secondLogger;
 })()
     .catch(err => {
         let actualError = err;
