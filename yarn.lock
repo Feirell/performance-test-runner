@@ -8,9 +8,9 @@
   integrity sha512-rG7Ieasa9UfZJnL72qiFvY9ivhEIYjCGgfcLLb5tJ/EL9+Mcxernj6W3HVCv/cOfJYuwNUwvVVhnrKl8iT8aqA==
 
 "@types/node@12":
-  version "12.12.43"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.43.tgz#b60ce047822e526e7a9252e50844eee79d5386ff"
-  integrity sha512-KUyZdkGCnVPuXfsKmDUu2XLui65LZIJ2s0M57noy5e+ixUT2oK33ep7zlvgzI8LElcWqbf8AR+o/3GqAPac2zA==
+  version "12.12.62"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.62.tgz#733923d73669188d35950253dd18a21570085d2b"
+  integrity sha512-qAfo81CsD7yQIM9mVyh6B/U47li5g7cfpVQEDMfQeF8pSZVwzbhwU3crc0qG4DmpsebpJPR49AKOExQyJ05Cpg==
 
 benchmark@^2.1.4:
   version "2.1.4"
@@ -34,9 +34,9 @@ insert-filecontent-into-markdown@^2.0.0:
     minimist "^1.2.0"
 
 lodash@^4.17.4:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
 
 minimist@^1.2.0:
   version "1.2.5"
@@ -44,16 +44,16 @@ minimist@^1.2.0:
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
 platform@^1.3.3:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.5.tgz#fb6958c696e07e2918d2eeda0f0bc9448d733444"
-  integrity sha512-TuvHS8AOIZNAlE77WUDiR4rySV/VMptyMfcfeoMgs4P8apaZM3JrnbzBiixKUv+XR6i+BXrQh8WAnjaSPFO65Q==
+  version "1.3.6"
+  resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.6.tgz#48b4ce983164b209c2d45a107adb31f473a6e7a7"
+  integrity sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==
 
 replace-printer@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/replace-printer/-/replace-printer-1.1.1.tgz#b1cd363a548f8782164ad76ccee9233c1750bd47"
-  integrity sha512-hp6hl8yyelOeUOBMGpO06QRIwjtAFbNL9fx+H11Y/eAr8U9IrGBeZ5OWQs6lZ1W5Dx0DkiLEuOrPKMqVHiKrug==
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/replace-printer/-/replace-printer-1.2.0.tgz#723245c5d7013a9261c1f8bf41af25679f0a49fc"
+  integrity sha512-IjS2xc6QWhdxgfdg4m0uiyiBg2tSf7MvvwUB5Sg4rVexDx4zBq0Cs1xZ5y5yyFPyUBo4s40Q/wVm3ytzGPsmiA==
 
 typescript@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.2.tgz#7ea7c88777c723c681e33bf7988be5d008d05ac2"
-  integrity sha512-e4ERvRV2wb+rRZ/IQeb3jm2VxBsirQLpQhdxplZ2MEzGvDkkMmPglecnNDfSUBivMjP93vRbngYYDQqQ/78bcQ==
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
+  integrity sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
