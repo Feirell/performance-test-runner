@@ -48,10 +48,10 @@ platform@^1.3.3:
   resolved "https://registry.yarnpkg.com/platform/-/platform-1.3.6.tgz#48b4ce983164b209c2d45a107adb31f473a6e7a7"
   integrity sha512-fnWVljUchTro6RiCFvCXBbNhJc2NijN7oIQxbwsyL0buWJPG85v81ehlHI9fXrJsMNgTofEoWIQeClKpgxFLrg==
 
-replace-printer@^1.1.1:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/replace-printer/-/replace-printer-1.2.0.tgz#723245c5d7013a9261c1f8bf41af25679f0a49fc"
-  integrity sha512-IjS2xc6QWhdxgfdg4m0uiyiBg2tSf7MvvwUB5Sg4rVexDx4zBq0Cs1xZ5y5yyFPyUBo4s40Q/wVm3ytzGPsmiA==
+replace-printer@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/replace-printer/-/replace-printer-1.2.2.tgz#96e8610e56160081da985f6333df5934b7036eb7"
+  integrity sha512-Ci3o1zhiSTVzime1yrVDQ6gWsDs02YrN0/ZOejq8zztemZq+ZnUL3SqJUu+f78jZ4kcZgYTXAQbtj9fHRNtU1A==
 
 typescript@^4.0.2:
   version "4.0.3"
