@@ -6,32 +6,40 @@ import {createThrottle} from "./throttle";
 
 let otherIsRunning = false;
 
+const calcFrameTime = (framerate: any, defaultFrameRate = 30) => {
+    let frameTime;
+
+    if (!Number.isFinite(framerate))
+        frameTime = 1000 / defaultFrameRate;
+    else if (framerate < 1)
+        frameTime = 1000;
+    else if (framerate == Infinity)
+        frameTime = 0;
+    else
+        frameTime = 1000 / framerate;
+
+    return frameTime;
+}
+
 export function printSuiteState(suite: PerformanceTestRunner, {
     printOnCycle = true,
     framerate = 30
-} = {}, {
-                                    continuesConsole: cc,
-                                    replaceConsole: rc
-                                } = new ReplacePrinter()) {
+} = {}, rp = new ReplacePrinter()) {
+    let {
+        continuesConsole: cc,
+        replaceConsole: rc
+    } = rp;
+
+    let update;
+
     return new Promise((res, rej) => {
         if (otherIsRunning)
             throw new Error('another suite is being printed at the moment');
 
-        let frameTime = 1000 / 30;
-
-        if (!Number.isFinite(framerate))
-            frameTime = 1000 / frameTime;
-        else if (framerate < 1)
-            frameTime = 1000;
-        else if (framerate == Infinity)
-            frameTime = 0;
-        else
-            frameTime = 1000 / framerate;
-
         const logState = () =>
             rc.log(formatResultTable(suite.extractTestResults()));
 
-        const update = createThrottle(logState, frameTime);
+        update = createThrottle(logState, calcFrameTime(framerate));
 
         suite.addListener('suite-started', () => update());
 
@@ -44,23 +52,21 @@ export function printSuiteState(suite: PerformanceTestRunner, {
 
         suite.addListener('benchmark-finished', () => update());
 
-        const closeWithEOL = () =>
-            process.stdout.write('\n')
-
-        // TODO try to resolve the bug with multiple suites (and suite console printers) which have line breaking issues
-        // so that the closeWithEOL is not needed anymore
-
         suite.addListener('suite-error', ({eventData: error}) => {
             cc.error(error);
             update(true)
-                .then(() => (closeWithEOL(), rej(error)));
+                .then(() => rej(error));
         });
 
         suite.addListener('suite-finished', () => {
             update(true)
-                .then(() => (closeWithEOL(), res()));
+                .then(() => res());
         });
     }).finally(() => {
+        // TODO create better way to stop all listeners from printing
+        rc = cc = null;
+        update = () => Promise.resolve();
+
         otherIsRunning = false
     });
 }
