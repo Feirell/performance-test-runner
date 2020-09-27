@@ -8,35 +8,38 @@ For example if you wanted to test whether `performance.now` or `Date.now` is fas
 
 <!-- USEFILE: examples\simple-tests.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
-Those test with the `baselineBundleBasic` will result in output similar to the following.
+Those test would result in output similar to the following.
 
 ```text
                       ops/sec  MoE samples relative
 timestamp
-  performance.now  10,090,797 0.94      84     1.24
-  Date.now          8,158,358 1.30      92     1.00
-baseline: basic bundle
-  for               1,108,250 1.66      89     1.00
-  array spread      1,171,126 0.86      91     1.06
-  walk proto      696,623,829 1.00      87   628.58
-  object spread    23,694,246 1.42      86    21.38
-  modulo           95,375,015 1.32      90    86.06
-  addition         95,631,301 0.80      88    86.29
+  performance.now 10,090,797 0.94      84     1.24
+  Date.now         8,158,358 1.30      92     1.00
 ```
 
 ## defaultTestRunner
 
-The exported `measure` and `speed` belong to the also exported `defaultTestRunner`.
+The exported `measure` and `speed` belong to the also exported `defaultTestRunner`. But you could create your own just as easily.
 
 <!-- USEFILE: examples\create-own.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
-The default runner is handy to spread your definition on multiple files like this.
+The default runner is handy to spread your definition on multiple files without having the other tests know about the circumstance of their invoking.
 
 <!-- USEFILE: examples\spread-definition.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 
+## context injection
+
+Since this package is using the `benchmark` package under the hood some constrains apply. One of the major things to keep in mind is that the benchmark package compiles the test function (and its corresponding setup and teardown) to one continues code block in some circumstances. Since it is not well documented when this is the case and when not, this package forces the compilation to create a uniform behavior.
+
+But this joining of the bodies from the corresponding functions and recompiling by the `function` function results in the loss of the context. Which in turn results in the loss of any closure the test function wanted to use.
+
+To allow the use of references from outside of the test function scope, this package provides another attribute in the `test` function. This given `context` object is available as either the identifier `global` or `window` (which are shadowed) by the benchmark package. This package extends this by unrolling the keys of the object, which can ease the usage if you keep the name for a seamless usage (see the arr example at the bottom).
+
+<!-- USEFILE: examples\context.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
+
 ## presenting results
 
-`PerformanceTestRunner::extractTestResults` returns a graph similar to the graph resulting from the `measure` and `speed` calls. But this package provides utility to format those results in a more readable format.
+`PerformanceTestRunner::extractTestResults` returns a graph similar to the graph resulting from the `measure` and `speed` calls. But this package provides utility to format those results in a more readable format. The easiest way to create a realtime readable log is to use the `runAndReport` function. 
 
 <!-- USEFILE: examples\log-results.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 

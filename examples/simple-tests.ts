@@ -1,9 +1,13 @@
 import {defaultTestRunner, measure, speed} from "../src/performance-test-runner";
+import {runAndReport} from "../src/suite-console-printer";
+
 import {performance} from "perf_hooks";
 
+let global: any;
+
 measure('timestamp', () => {
-    speed('performance.now', () => {
-        performance.now();
+    speed('performance.now', {performance}, () => {
+        global.performance.now();
     });
 
     speed('Date.now', () => {
@@ -11,15 +15,4 @@ measure('timestamp', () => {
     });
 });
 
-(async () => {
-    await defaultTestRunner.runSuite();
-    console.log(defaultTestRunner.extractTestResults());
-})()
-    .catch(err => {
-        let actualError = err;
-        if (err.type == 'error')
-            actualError = err.message;
-
-        console.error(actualError);
-        process.exit(1);
-    });
+runAndReport(defaultTestRunner);

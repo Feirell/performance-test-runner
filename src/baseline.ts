@@ -11,7 +11,7 @@ export function baselineFunctionArraySpread(speed = defaultSpeed) {
     for (let i = 0; i < 200; i++)
         array[i] = i;
 
-    speed('array spread', () => {
+    speed('array spread', {array}, () => {
         let n = [...array];
     });
 }
@@ -23,7 +23,7 @@ export function baselineFunctionWalkProto(speed = defaultSpeed) {
     const d = Object.create(c);
     const e = Object.create(d);
 
-    speed('walk proto', () => {
+    speed('walk proto', {e}, () => {
         'test' in e;
     });
 }
@@ -40,14 +40,14 @@ export function baselineFunctionObjectSpread(speed = defaultSpeed) {
         testH: 8
     };
 
-    speed('object spread', () => {
+    speed('object spread', {object}, () => {
         let n = {...object};
     });
 }
 
 export function baselineFunctionModulo(speed = defaultSpeed) {
     let i = 0;
-    speed('modulo', () => {
+    speed('modulo', {i}, () => {
         let d = 5007.4 + i++;
         d %= 2;
         d %= 3;
@@ -63,7 +63,7 @@ export function baselineFunctionModulo(speed = defaultSpeed) {
 
 export function baselineFunctionAddition(speed = defaultSpeed) {
     let i = 0;
-    speed('addition', () => {
+    speed('addition', {i}, () => {
         let d = 5007.4 + i++;
         d += 2;
         d += 3;

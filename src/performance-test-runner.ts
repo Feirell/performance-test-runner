@@ -2,7 +2,9 @@ import {EventEmitter} from 'events';
 import * as Benchmark from 'Benchmark';
 
 import {depthFirst, depthFirstAsync, mapDepthFirst} from "./tree-walker";
-import {formatResultTable, PossibleTableFormatterTypes} from "./stringify-result-table";
+import {extractFunctionBodyString} from "./function-body-helper";
+
+type AnyObject = { [key: string]: any }
 
 interface SpeedAndMeasure<T extends 'speed' | 'measure'> {
     type: T;
@@ -11,6 +13,7 @@ interface SpeedAndMeasure<T extends 'speed' | 'measure'> {
 
 interface SpeedTest extends SpeedAndMeasure<'speed'> {
     title: string;
+    ctx: AnyObject
     setup: () => any;
     test: () => any;
     teardown: () => any;
@@ -74,6 +77,33 @@ export type AllSPTRTypes =
     SPTRMeasurementsRunningFinished |
     SPTRGroup;
 
+const orderFunctions = (functions: (() => any)[]) => {
+    if (functions.length < 1)
+        throw new Error('at least the test function needs to be defined');
+
+    if (functions.length > 3)
+        throw new Error('too many functions given, can only use setup, test and teardown');
+
+    if (functions.length == 1)
+        return [noop, functions[0], noop];
+
+    else if (functions.length == 2)
+        return [functions[0], functions[1], noop];
+
+    return functions;
+}
+
+const isValidIdentifier = (id: string) => {
+    if (/[ ;\n]/.test(id))
+        return false;
+
+    try {
+        return Function('var ' + id + ' = 0; return ' + id + ';')() == 0
+    } catch (e) {
+        return false;
+    }
+}
+
 export class PerformanceTestRunner extends EventEmitter {
     private suiteRunning = false;
 
@@ -109,27 +139,27 @@ export class PerformanceTestRunner extends EventEmitter {
     }
 
     public speed(title: string, test: () => any);
+    public speed(title: string, context: AnyObject, test: () => any);
+
     public speed(title: string, setup: () => any, test: () => any);
+    public speed(title: string, context: AnyObject, setup: () => any, test: () => any);
+
     public speed(title: string, setup: () => any, test: () => any, teardown: () => any);
+    public speed(title: string, context: AnyObject, setup: () => any, test: () => any, teardown: () => any);
 
-    public speed(title: string, ...functions: (() => any)[]) {
-        if (functions.length < 1)
-            throw new Error('at least the test function needs to be defined');
+    public speed(title: string, firstFncOrContext: AnyObject | (() => any), ...functions: (() => any)[]) {
+        let ctx = {} as AnyObject;
 
-        if (functions.length > 3)
-            throw new Error('too many functions given, can only use setup, test and teardown');
+        if (typeof firstFncOrContext == 'function')
+            functions.unshift(firstFncOrContext as () => any);
+        else
+            ctx = firstFncOrContext;
 
-        if (functions.length == 1)
-            functions = [noop, functions[0], noop];
-
-        else if (functions.length == 2)
-            functions = [functions[0], functions[1], noop];
-
-        const [setup, test, teardown] = functions;
+        const [setup, test, teardown] = orderFunctions(functions);
 
         const currentTest: SpeedTest = {
             type: "speed",
-            title, setup, test, teardown,
+            title, ctx, setup, test, teardown,
             benchmark: undefined
         };
 
@@ -184,28 +214,6 @@ export class PerformanceTestRunner extends EventEmitter {
         return true;
     }
 
-    private emitSuiteEvent(ev: 'suite-started' | 'suite-error' | 'suite-finished', eventData: any = undefined) {
-        this.emit(ev, {
-            type: ev,
-            timestamp: Date.now(),
-            suite: this,
-            eventData
-        } as SuiteEvent);
-    }
-
-    private emitBenchmarkEvent(ev: 'benchmark-started' | 'benchmark-cycle' | 'benchmark-error' | 'benchmark-finished',
-                               ag: MeasureGroup, at: SpeedTest, bench: Benchmark, eventData: any = undefined) {
-        this.emit(ev, {
-            type: ev,
-            timestamp: Date.now(),
-            suite: this,
-            associatedGroup: ag,
-            associatedTest: at,
-            benchmark: bench,
-            eventData: eventData
-        } as BenchmarkEvent);
-    }
-
     async runSuite({clearPreviousResults = true} = {}) {
         if (this.testTree.length == 0)
             return false;
@@ -225,16 +233,43 @@ export class PerformanceTestRunner extends EventEmitter {
                 if (elem.type == 'measure')
                     return;
 
-                const {setup, test: fn, teardown} = elem;
+                const {ctx, setup, test: fn, teardown} = elem;
 
                 let bench: Benchmark;
 
                 const benchPromise = new Promise((res, rej) => {
-                    bench = new Benchmark({
-                        setup, fn, teardown, async: true,
+                    const ContextInjectedBench = (Benchmark as any).runInContext(ctx) as typeof Benchmark
+
+                    // derolling the context object from the "global" to allow users use attributes of the context without
+                    // prepending "global."
+
+                    // Warning: this will not work with transpilers like tsc since they create new identifier in the process
+
+                    const contextUnrolled = Object.keys(ctx)
+                        // remove keys which are not valid identifier
+                        .filter(isValidIdentifier)
+                        .map(k => 'let ' + k + ' = global.' + k + ';').join('\n') + '\n';
+
+                    // extracting the body, since it is not clear when the benchmark package compiles the function and when not
+                    // this ensures that all tests run in the same manner and ensure that a given context can be used
+                    // by the test function
+
+                    const setupBody = extractFunctionBodyString(setup);
+                    const fnBody = extractFunctionBodyString(fn);
+                    const teardownBody = extractFunctionBodyString(teardown);
+
+                    const onCycle = (ev: any) => this.emitBenchmarkEvent('benchmark-cycle', parent, elem, bench, ev);
+
+                    bench = new ContextInjectedBench({
+                        setup: contextUnrolled + setupBody,
+                        fn: fnBody,
+                        teardown: teardownBody,
+
+                        async: true,
+
                         onError: rej,
                         onComplete: res,
-                        onCycle: (ev: any) => this.emitBenchmarkEvent('benchmark-cycle', parent, elem, bench, ev),
+                        onCycle
                     });
                 });
 
@@ -264,6 +299,28 @@ export class PerformanceTestRunner extends EventEmitter {
         this.emitSuiteEvent('suite-finished');
 
         return true;
+    }
+
+    private emitSuiteEvent(ev: 'suite-started' | 'suite-error' | 'suite-finished', eventData: any = undefined) {
+        this.emit(ev, {
+            type: ev,
+            timestamp: Date.now(),
+            suite: this,
+            eventData
+        } as SuiteEvent);
+    }
+
+    private emitBenchmarkEvent(ev: 'benchmark-started' | 'benchmark-cycle' | 'benchmark-error' | 'benchmark-finished',
+                               ag: MeasureGroup, at: SpeedTest, bench: Benchmark, eventData: any = undefined) {
+        this.emit(ev, {
+            type: ev,
+            timestamp: Date.now(),
+            suite: this,
+            associatedGroup: ag,
+            associatedTest: at,
+            benchmark: bench,
+            eventData: eventData
+        } as BenchmarkEvent);
     }
 
 

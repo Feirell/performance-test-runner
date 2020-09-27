@@ -1,6 +1,13 @@
 import {performance} from "perf_hooks";
 
-export default function example() {
-    const start = performance.now();
-    while (performance.now() - start <= 2) ;
+export class Example {
+
+    constructor() {
+        // some initialization
+    }
+
+    run() {
+        const start = performance.now();
+        while (performance.now() - start <= 2) ;
+    }
 }

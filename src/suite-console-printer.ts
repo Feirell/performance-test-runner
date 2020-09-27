@@ -1,6 +1,6 @@
 import {ReplacePrinter} from "replace-printer";
 
-import {PerformanceTestRunner} from "./performance-test-runner";
+import {defaultTestRunner, PerformanceTestRunner} from "./performance-test-runner";
 import {formatResultTable} from "./stringify-result-table";
 import {createThrottle} from "./throttle";
 
@@ -69,4 +69,20 @@ export function printSuiteState(suite: PerformanceTestRunner, {
 
         otherIsRunning = false
     });
+}
+
+export function runAndReport(pts = defaultTestRunner, sp = new ReplacePrinter()) {
+    return (async () => {
+        const logger = printSuiteState(pts, {printOnCycle: true, framerate: 30});
+        await pts.runSuite();
+        await logger;
+    })()
+        .catch(err => {
+            let actualError = err;
+            if (err.type == 'error')
+                actualError = err.message;
+
+            console.error(actualError);
+            process.exit(1);
+        });
 }

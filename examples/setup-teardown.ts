@@ -1,10 +1,12 @@
 import {defaultTestRunner, measure, speed} from "../src/performance-test-runner";
-import {printSuiteState} from "../src/suite-console-printer";
+import {runAndReport} from "../src/suite-console-printer";
+
+import {Example} from "./some-script";
 
 measure('object manipulation', () => {
     speed('delete', () => {
         // This is the setup block
-        var obj = {
+        let obj = {
             attr: 12
         }
     }, () => {
@@ -19,35 +21,13 @@ measure('object manipulation', () => {
         obj = undefined;
     });
 
-    (global).require = require;
-
-    speed('with external', () => {
-        // you need to (re-)import your code in the setup block if you need a setup block
-        var realExtensiveFnc = require('./some-script').default;
-
-        import('./some-script'); // this will only be needed if you want TypeScript to realise that you are using some-script.ts
+    speed('with external', {Example}, () => {
+        const instance = new Example();
     }, () => {
-        var realExtensiveFnc; // redeclaring to help out your IDE / TypeScript
+        var instance; // redeclaring to help out your IDE / TypeScript
 
-        realExtensiveFnc();
+        instance.run();
     })
 });
 
-(async () => {
-    // you can also run the suite twice
-    const firstLogger = printSuiteState(defaultTestRunner, {printOnCycle: true, framerate: 30});
-    await defaultTestRunner.runSuite();
-    await firstLogger;
-
-    const secondLogger = printSuiteState(defaultTestRunner, {printOnCycle: true, framerate: 30});
-    await defaultTestRunner.runSuite();
-    await secondLogger;
-})()
-    .catch(err => {
-        let actualError = err;
-        if (err.type == 'error')
-            actualError = err.message;
-
-        console.error(actualError);
-        process.exit(1);
-    });
+runAndReport(defaultTestRunner);
