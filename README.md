@@ -210,11 +210,9 @@ This is the simplest way to log the performance measurements in realtime. If you
 
 ## teardown and setup
 
-Since this package uses the benchmark module you can use a setup-test-teardown lifecycle. You can provide those by supplying more than one function to the `speed` call. Be aware that the behavior of the test changes when you provide the setup or the teardown.
+Since this package uses the benchmark module you can use a setup-test-teardown lifecycle. You can provide those by supplying more than one function to the `speed` call.
 
 Benchmark will concat the code in the setup, test and teardown functions with the `Function` function, which changes the context of the code which results in the break of the closure scope. This means that you can not use any identifier defined outside of one of the three functions.
-
-As shown in this example you need to import / require your external functions inside the setup function to use them again. To help your IDE / TypeScript with this behavior you can use `var` since it does not raise a syntax exception when you redeclare an identifier.
 
 <!-- USEFILE: examples\setup-teardown.ts; str => str.replace(/\.\.\/src/g, 'performance-test-runner/lib').replace(/performance-test-runner\/lib\/performance-test-runner/,'performance-test-runner') -->
 ``` ts
@@ -287,8 +285,4 @@ runAndReport(defaultTestRunner);
 
 ## submitting issues
  
-Please try to create your benchmark manually with the benchmark package when you encounter an issue to ensure that it is actually an error with this package. There are known issues with benchmark for example will `throw` cause the code to be recompiled by benchmark, like it is the case with setup and teardown, which results in the changed scope.
-
-This might seem counterintuitive, because it could result in errors that identifier are missing, since the identifier is the result of an import.
-
-This and other edge cases can result in unexpected behavior, therefore please make sure that your test works with the benchmark package before opening an issue.
+Please try to create your benchmark manually with the benchmark package when you encounter an issue to ensure that it is actually an error with this package. Be aware that the recompilation can lead to counterintuitive behavior since the scope is broken. 
